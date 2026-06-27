@@ -31,6 +31,7 @@ const App: React.FC = () => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [passwordInput, setPasswordInput] = useState<string>('');
     const [authError, setAuthError] = useState<string | null>(null);
+    const [userApiKey, setUserApiKey] = useState<string>('');
 
     const [referenceImage, setReferenceImage] = useState<string | null>(null);
     const [referenceImageFile, setReferenceImageFile] = useState<File | null>(null);
@@ -49,6 +50,25 @@ const App: React.FC = () => {
     const [isSeparating, setIsSeparating] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
+    const getApiKey = () => userApiKey.trim() || (process.env.API_KEY as string | undefined) || '';
+
+    const requireApiKey = () => {
+        const apiKey = getApiKey();
+        if (!apiKey) {
+            setError('Vui lòng nhập API key trước khi sử dụng.');
+            return null;
+        }
+        return apiKey;
+    };
+
+    const handleClearApiKey = () => {
+        setUserApiKey('');
+        setStyleAnalysis(null);
+        setGeneratedImage(null);
+        setColorLayers(layers => layers.map(l => ({ ...l, imageData: null, isLoading: false })));
+        setError(null);
+    };
+
     const handlePasswordSubmit = (event: React.FormEvent) => {
         event.preventDefault();
         if (passwordInput === 'printee@1234') {
@@ -63,6 +83,12 @@ const App: React.FC = () => {
     const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
+            const apiKey = requireApiKey();
+            if (!apiKey) {
+                event.target.value = '';
+                return;
+            }
+
             // Reset states
             setReferenceImageFile(file);
             setReferenceImage(URL.createObjectURL(file));
@@ -74,7 +100,7 @@ const App: React.FC = () => {
 
             try {
                 const base64Data = await fileToBase64(file);
-                const ai = new GenerativeClient({ apiKey: process.env.API_KEY as string });
+                const ai = new GenerativeClient({ apiKey });
 
                 const response = await ai.models.generateContent({
                     model: "gemini-3-pro-preview",
@@ -133,6 +159,11 @@ const App: React.FC = () => {
     };
 
     const handleGenerateClick = async () => {
+        const apiKey = requireApiKey();
+        if (!apiKey) {
+            return;
+        }
+
         if (!referenceImageFile || !styleAnalysis) {
             setError('Vui lòng tải lên ảnh mẫu và chờ phân tích hoàn tất.');
             return;
@@ -142,7 +173,7 @@ const App: React.FC = () => {
         setError(null);
 
         try {
-            const ai = new GenerativeClient({ apiKey: process.env.API_KEY as string });
+            const ai = new GenerativeClient({ apiKey });
             const base64Data = await fileToBase64(referenceImageFile);
             
             const prompt = `
@@ -198,13 +229,18 @@ const App: React.FC = () => {
     };
     
     const handleSeparateLayers = async () => {
+        const apiKey = requireApiKey();
+        if (!apiKey) {
+            return;
+        }
+
         if (!generatedImage) {
             setError('Vui lòng tạo hình ảnh thành phố trước.');
             return;
         }
         setIsSeparating(true);
         setError(null);
-        const ai = new GenerativeClient({ apiKey: process.env.API_KEY as string });
+        const ai = new GenerativeClient({ apiKey });
 
         for (const layer of colorLayers) {
             setColorLayers(prev => prev.map(l => l.name === layer.name ? { ...l, isLoading: true, imageData: null } : l));
@@ -286,7 +322,38 @@ const App: React.FC = () => {
                         {/* --- Cột điều khiển --- */}
                         <div className="bg-gray-800/50 p-6 rounded-2xl border border-gray-700 space-y-6">
                             <div>
-                                <h2 className="text-2xl font-bold mb-4 border-b-2 border-cyan-500 pb-2">1. Tải Lên Ảnh Mẫu</h2>
+                                <h2 className="text-2xl font-bold mb-4 border-b-2 border-cyan-500 pb-2">1. Nhập API Key</h2>
+                                <div className="space-y-3">
+                                    <input
+                                        type="password"
+                                        value={userApiKey}
+                                        onChange={(e) => {
+                                            setUserApiKey(e.target.value);
+                                            if (error === 'Vui lòng nhập API key trước khi sử dụng.') {
+                                                setError(null);
+                                            }
+                                        }}
+                                        placeholder="Nhập API key của bạn"
+                                        className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                        autoComplete="off"
+                                        spellCheck={false}
+                                    />
+                                    <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+                                        <p className="text-xs text-gray-500">Key chỉ giữ tạm trong phiên làm việc này, không lưu vào trình duyệt.</p>
+                                        <button
+                                            type="button"
+                                            onClick={handleClearApiKey}
+                                            className="px-4 py-2 text-sm font-semibold text-gray-200 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            disabled={!userApiKey && !styleAnalysis && !generatedImage}
+                                        >
+                                            Xóa API key
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h2 className="text-2xl font-bold mb-4 border-b-2 border-cyan-500 pb-2">2. Tải Lên Ảnh Mẫu</h2>
                                 <div className="flex items-center justify-center w-full">
                                     <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-800 hover:bg-gray-700 transition-colors">
                                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -309,7 +376,7 @@ const App: React.FC = () => {
                             )}
 
                             <div className="animate-fade-in">
-                                <h2 className="text-2xl font-bold mb-4 border-b-2 border-cyan-500 pb-2">2. Phân Tích Phong Cách</h2>
+                                <h2 className="text-2xl font-bold mb-4 border-b-2 border-cyan-500 pb-2">3. Phân Tích Phong Cách</h2>
                                 {isLoadingAnalysis && (
                                     <div className="flex flex-col space-y-2 bg-blue-900/20 p-4 rounded-lg border border-blue-500/30">
                                         <div className="flex items-center text-cyan-400 font-semibold">
@@ -340,7 +407,7 @@ const App: React.FC = () => {
                             </div>
 
                             <div className="animate-fade-in">
-                                <h2 className="text-2xl font-bold mb-4 border-b-2 border-cyan-500 pb-2">3. Tạo Graphic Mới</h2>
+                                <h2 className="text-2xl font-bold mb-4 border-b-2 border-cyan-500 pb-2">4. Tạo Graphic Mới</h2>
                                 <div className="space-y-4">
                                     <div>
                                         <label htmlFor="city-select" className="block text-sm font-medium text-gray-400 mb-1">Chọn thành phố</label>

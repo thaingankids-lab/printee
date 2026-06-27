@@ -77,13 +77,15 @@ Cai dependencies:
 npm install
 ```
 
-Tao file `.env.local`:
+Mac dinh ung dung cho phep nguoi dung nhap API key truc tiep tren giao dien. Key chi duoc giu trong bo nho cua phien web hien tai, khong luu vao localStorage hoac cookie.
+
+Neu muon dat key mac dinh khi chay local, tao file `.env.local`:
 
 ```env
 APP_API_KEY=your_api_key_here
 ```
 
-Neu ban da co san bien ten `API_KEY` hoac `GEMINI_API_KEY`, app van se doc duoc. Uu tien khuyen dung `APP_API_KEY`.
+Neu ban da co san bien ten `API_KEY` hoac `GEMINI_API_KEY`, app van se doc duoc. Uu tien khuyen dung `APP_API_KEY`. Key nguoi dung nhap tren giao dien se duoc uu tien hon key mac dinh.
 
 Chay development:
 
@@ -108,12 +110,14 @@ Thiet lap tren Vercel:
 - Build Command: `npm run build`
 - Output Directory: `dist`
 
-Them bien moi truong tren Vercel:
+Vercel khong bat buoc phai cau hinh API key. Nguoi dung co the tu nhap API key tren web khi su dung.
+
+Neu muon dat key mac dinh cho ban deploy, them bien moi truong tren Vercel:
 
 ```env
 APP_API_KEY=your_api_key_here
 ```
 
-Co the dung `API_KEY` hoac `GEMINI_API_KEY` neu project cua ban da dat san ten do.
+Co the dung `API_KEY` hoac `GEMINI_API_KEY` neu project cua ban da dat san ten do. Key nguoi dung nhap tren web se duoc uu tien hon key mac dinh cua Vercel.
 
 Sau khi them hoac sua bien moi truong, bat buoc redeploy project de Vercel build lai bundle.
