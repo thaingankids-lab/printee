@@ -77,7 +77,7 @@ Cai dependencies:
 npm install
 ```
 
-Mac dinh ung dung cho phep nguoi dung nhap API key truc tiep tren giao dien. Key chi duoc giu trong bo nho cua phien web hien tai, khong luu vao localStorage hoac cookie.
+Mac dinh ung dung cho phep nguoi dung nhap va test API key truc tiep tren giao dien. Key chi duoc giu trong bo nho cua phien web hien tai, khong luu vao localStorage hoac cookie.
 
 Neu muon dat key mac dinh khi chay local, tao file `.env.local`:
 

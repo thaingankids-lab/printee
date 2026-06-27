@@ -32,6 +32,8 @@ const App: React.FC = () => {
     const [passwordInput, setPasswordInput] = useState<string>('');
     const [authError, setAuthError] = useState<string | null>(null);
     const [userApiKey, setUserApiKey] = useState<string>('');
+    const [apiKeyStatus, setApiKeyStatus] = useState<'idle' | 'testing' | 'valid' | 'invalid'>('idle');
+    const [apiKeyMessage, setApiKeyMessage] = useState<string>('');
 
     const [referenceImage, setReferenceImage] = useState<string | null>(null);
     const [referenceImageFile, setReferenceImageFile] = useState<File | null>(null);
@@ -63,10 +65,45 @@ const App: React.FC = () => {
 
     const handleClearApiKey = () => {
         setUserApiKey('');
+        setApiKeyStatus('idle');
+        setApiKeyMessage('');
         setStyleAnalysis(null);
         setGeneratedImage(null);
         setColorLayers(layers => layers.map(l => ({ ...l, imageData: null, isLoading: false })));
         setError(null);
+    };
+
+    const handleTestApiKey = async () => {
+        const apiKey = requireApiKey();
+        if (!apiKey) {
+            setApiKeyStatus('invalid');
+            setApiKeyMessage('Chưa có API key để test.');
+            return;
+        }
+
+        setApiKeyStatus('testing');
+        setApiKeyMessage('');
+        setError(null);
+
+        try {
+            const ai = new GenerativeClient({ apiKey });
+            const response = await ai.models.generateContent({
+                model: 'gemini-2.5-flash',
+                contents: 'ping',
+            });
+
+            if (!response.text) {
+                throw new Error('API key hoạt động nhưng không nhận được phản hồi kiểm tra.');
+            }
+
+            setApiKeyStatus('valid');
+            setApiKeyMessage('API key hợp lệ và có thể sử dụng.');
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Không thể kiểm tra API key.';
+            setApiKeyStatus('invalid');
+            setApiKeyMessage(message);
+            setError(message);
+        }
     };
 
     const handlePasswordSubmit = (event: React.FormEvent) => {
@@ -329,6 +366,8 @@ const App: React.FC = () => {
                                         value={userApiKey}
                                         onChange={(e) => {
                                             setUserApiKey(e.target.value);
+                                            setApiKeyStatus('idle');
+                                            setApiKeyMessage('');
                                             if (error === 'Vui lòng nhập API key trước khi sử dụng.') {
                                                 setError(null);
                                             }
@@ -340,15 +379,30 @@ const App: React.FC = () => {
                                     />
                                     <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
                                         <p className="text-xs text-gray-500">Key chỉ giữ tạm trong phiên làm việc này, không lưu vào trình duyệt.</p>
-                                        <button
-                                            type="button"
-                                            onClick={handleClearApiKey}
-                                            className="px-4 py-2 text-sm font-semibold text-gray-200 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                            disabled={!userApiKey && !styleAnalysis && !generatedImage}
-                                        >
-                                            Xóa API key
-                                        </button>
+                                        <div className="flex gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={handleTestApiKey}
+                                                className="px-4 py-2 text-sm font-semibold text-white bg-cyan-600 rounded-lg hover:bg-cyan-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                disabled={apiKeyStatus === 'testing'}
+                                            >
+                                                {apiKeyStatus === 'testing' ? 'Đang test...' : 'Test API key'}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={handleClearApiKey}
+                                                className="px-4 py-2 text-sm font-semibold text-gray-200 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                disabled={!userApiKey && !styleAnalysis && !generatedImage}
+                                            >
+                                                Xóa API key
+                                            </button>
+                                        </div>
                                     </div>
+                                    {apiKeyMessage && (
+                                        <p className={`text-sm ${apiKeyStatus === 'valid' ? 'text-green-400' : 'text-red-400'}`}>
+                                            {apiKeyMessage}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
