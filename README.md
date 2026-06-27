@@ -83,6 +83,8 @@ Tao file `.env.local`:
 APP_API_KEY=your_api_key_here
 ```
 
+Neu ban da co san bien ten `API_KEY` hoac `GEMINI_API_KEY`, app van se doc duoc. Uu tien khuyen dung `APP_API_KEY`.
+
 Chay development:
 
 ```bash
@@ -112,4 +114,6 @@ Them bien moi truong tren Vercel:
 APP_API_KEY=your_api_key_here
 ```
 
-Sau khi them bien moi truong, redeploy project.
+Co the dung `API_KEY` hoac `GEMINI_API_KEY` neu project cua ban da dat san ten do.
+
+Sau khi them hoac sua bien moi truong, bat buoc redeploy project de Vercel build lai bundle.
