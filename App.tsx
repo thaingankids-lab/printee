@@ -140,7 +140,7 @@ const App: React.FC = () => {
                 const ai = new GenerativeClient({ apiKey });
 
                 const response = await ai.models.generateContent({
-                    model: "gemini-3-pro-preview",
+                    model: "gemini-3.1-pro-preview",
                     contents: {
                         parts: [{
                             inlineData: { mimeType: file.type, data: base64Data }
