@@ -8,9 +8,10 @@ Printee Design Graphic la ung dung web Single-Page Application xay dung bang Rea
 
 Ung dung ho tro:
 
-1. Phan tich phong cach thiet ke tu anh mau.
-2. Tao poster graphic moi theo thanh pho duoc chon.
-3. Tach lop mau CMYK phuc vu quy trinh in an.
+1. Nhap va test API key truc tiep tren giao dien.
+2. Tai anh mau lam visual reference.
+3. Tao poster graphic moi theo thanh pho duoc chon.
+4. Tai anh graphic da tao ve may.
 
 ## Ban quyen
 
@@ -32,16 +33,13 @@ Ung dung co man hinh xac thuc don gian de gioi han quyen su dung:
 Ung dung gom 3 buoc chinh:
 
 ```text
+[Nhap va test API key]
+       |
+       v
 [Tai anh mau len]
        |
        v
-[Phan tich phong cach thiet ke]
-       |
-       v
 [Tao poster theo thanh pho da chon]
-       |
-       v
-[Tach 4 lop mau CMYK]
 ```
 
 ## Cau truc ma nguon
@@ -57,7 +55,6 @@ Ung dung gom 3 buoc chinh:
 |-- metadata.json          # Metadata ung dung
 |-- package.json           # Dependencies va scripts
 |-- tsconfig.json
-|-- types.ts               # TypeScript interfaces
 |-- vite.config.ts         # Cau hinh Vite
 `-- components/
     |-- Icons.tsx
